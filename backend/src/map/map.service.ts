@@ -1,26 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { MapRepository } from './map.repository';
-import { User } from '../user/user.entity';
-import { CreateMapForm } from './dto/CreateMapForm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { User } from '../user/entity/user.entity';
 import { MapListResponse } from './dto/MapListResponse';
 import { MapDetailResponse } from './dto/MapDetailResponse';
+import { UserRepository } from '../user/user.repository';
+import { UpdateMapInfoRequest } from './dto/UpdateMapInfoRequest';
+import { CreateMapRequest } from './dto/CreateMapRequest';
 import { MapNotFoundException } from './exception/MapNotFoundException';
+import { DuplicatePlaceToMapException } from './exception/DuplicatePlaceToMapException';
+import { PlaceRepository } from '../place/place.repository';
+import { InvalidPlaceToMapException } from './exception/InvalidPlaceToMapException';
+import { Map } from './entity/map.entity';
 
 @Injectable()
 export class MapService {
   constructor(
     private readonly mapRepository: MapRepository,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly userRepository: UserRepository,
+    private readonly placeRepository: PlaceRepository,
   ) {
     // Todo. 로그인 기능 완성 후 제거
     const testUser = new User('test', 'test', 'test', 'test');
     testUser.id = 1;
-    userRepository.upsert(testUser, { conflictPaths: ['id'] });
+    this.userRepository.upsert(testUser, { conflictPaths: ['id'] });
   }
 
   // Todo. 작성자명 등 ... 검색 조건 추가
+  // Todo. fix : public 으로 조회해서 페이지마다 수 일정하게. (현재는 한 페이지에 10개 미만인 경우 존재)
   async searchMap(query?: string, page: number = 1, pageSize: number = 10) {
     const maps = query
       ? await this.mapRepository.searchByTitleQuery(query, page, pageSize)
@@ -60,12 +66,12 @@ export class MapService {
 
   async getMapById(id: number) {
     const map = await this.mapRepository.findById(id);
-    if (map) return await MapDetailResponse.from(map);
+    if (!map) throw new MapNotFoundException(id);
 
-    throw new MapNotFoundException(id);
+    return await MapDetailResponse.from(map);
   }
 
-  async createMap(userId: number, createMapForm: CreateMapForm) {
+  async createMap(userId: number, createMapForm: CreateMapRequest) {
     const user = { id: userId } as User;
     const map = createMapForm.toEntity(user);
 
@@ -73,7 +79,61 @@ export class MapService {
   }
 
   async deleteMap(id: number) {
+    await this.checkExists(id);
+
     await this.mapRepository.softDelete(id);
     return { id };
+  }
+
+  async updateMapInfo(id: number, updateMapForm: UpdateMapInfoRequest) {
+    await this.checkExists(id);
+
+    const { title, description } = updateMapForm;
+    return this.mapRepository.update(id, { title, description });
+  }
+
+  async updateMapVisibility(id: number, isPublic: boolean) {
+    await this.checkExists(id);
+
+    return this.mapRepository.update(id, { isPublic });
+  }
+
+  private async checkExists(id: number) {
+    if (!(await this.mapRepository.existById(id)))
+      throw new MapNotFoundException(id);
+  }
+
+  async addPlace(id: number, placeId: number, comment?: string) {
+    const map = await this.mapRepository.findById(id);
+    if (!map) throw new MapNotFoundException(id);
+    await this.checkPlaceCanAddToMap(placeId, map);
+
+    map.addPlace(placeId, comment);
+    await this.mapRepository.save(map);
+
+    return {
+      savedPlaceId: placeId,
+      comment: comment,
+    };
+  }
+
+  private async checkPlaceCanAddToMap(placeId: number, map: Map) {
+    if (!(await this.placeRepository.existById(placeId))) {
+      throw new InvalidPlaceToMapException(placeId);
+    }
+
+    if (await map.hasPlace(placeId)) {
+      throw new DuplicatePlaceToMapException(placeId);
+    }
+  }
+
+  async deletePlace(id: number, placeId: number) {
+    const map = await this.mapRepository.findById(id);
+    if (!map) throw new MapNotFoundException(id);
+
+    map.deletePlace(placeId);
+    await this.mapRepository.save(map);
+
+    return { deletedId: placeId };
   }
 }

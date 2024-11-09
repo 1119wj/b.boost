@@ -26,7 +26,7 @@ export class MapRepository extends SoftDeleteRepository<Map, number> {
 
   findByUserId(userId: number, page: number, pageSize: number) {
     return this.find({
-      where: { user: { id: userId }, deletedAt: null },
+      where: { user: { id: userId } },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });

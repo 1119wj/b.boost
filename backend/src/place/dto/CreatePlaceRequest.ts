@@ -4,8 +4,9 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
+import { Place } from '../entity/place.entity';
 
-export class CreatePlaceDto {
+export class CreatePlaceRequest {
   @IsString()
   @IsNotEmpty()
   googlePlaceId: string;
@@ -35,4 +36,18 @@ export class CreatePlaceDto {
 
   @IsString()
   detailPageUrl?: string;
+
+  toEntity() {
+    return new Place(
+      this.googlePlaceId,
+      this.name,
+      this.thumbnailUrl,
+      this.rating,
+      this.location.longitude,
+      this.location.latitude,
+      this.formattedAddress,
+      this.description,
+      this.detailPageUrl,
+    );
+  }
 }

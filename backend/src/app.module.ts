@@ -7,6 +7,9 @@ import { AppService } from './app.service';
 import { TypeOrmConfigService } from './config/TypeOrmConfigService';
 import { MapModule } from './map/map.module';
 import { PlaceModule } from './place/place.module';
+import { CourseModule } from './course/course.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -14,8 +17,11 @@ import { PlaceModule } from './place/place.module';
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
     }),
+    AuthModule,
+    UserModule,
     PlaceModule,
     MapModule,
+    CourseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

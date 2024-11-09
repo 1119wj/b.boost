@@ -1,8 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../common/BaseEntity';
-import { User } from '../../user/user.entity';
+import { User } from '../../user/entity/user.entity';
 import { MapPlace } from './map-place.entity';
-import { Place } from '../../place/place.entity';
 
 @Entity()
 export class Map extends BaseEntity {
@@ -22,7 +21,10 @@ export class Map extends BaseEntity {
   @Column('text', { nullable: true })
   description?: string;
 
-  @OneToMany(() => MapPlace, (mapPlace) => mapPlace.map, { eager: true })
+  @OneToMany(() => MapPlace, (mapPlace) => mapPlace.map, {
+    eager: true,
+    cascade: true,
+  })
   mapPlaces: MapPlace[];
 
   constructor(
@@ -44,11 +46,24 @@ export class Map extends BaseEntity {
     return this.mapPlaces.length;
   }
 
-  async getPlaces(): Promise<Place[]> {
-    return Promise.all(
-      this.mapPlaces.map(async (mapPlace) => {
-        return await mapPlace.place;
-      }),
+  addPlace(placeId: number, description: string) {
+    this.mapPlaces.push(MapPlace.of(placeId, this, description));
+  }
+
+  async deletePlace(placeId: number) {
+    this.mapPlaces = this.mapPlaces.filter((p) => p.placeId !== placeId);
+  }
+
+  async hasPlace(placeId: number) {
+    return this.mapPlaces.some((p) => p.placeId === placeId);
+  }
+
+  async getPlacesWithComment() {
+    return await Promise.all(
+      this.mapPlaces.map(async (mapPlace) => ({
+        place: await mapPlace.place,
+        comment: mapPlace.description,
+      })),
     );
   }
 }
