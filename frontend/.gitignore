@@ -26,3 +26,4 @@ build
 .env
 package-lock.json
 .github
+.backend
