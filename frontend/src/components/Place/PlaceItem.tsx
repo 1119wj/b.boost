@@ -3,9 +3,10 @@ import { Place } from '@/types';
 
 type PlaceItemProps = {
   place: Place;
+  isDetailPage?: boolean;
 };
 
-const PlaceItem = ({ place }: PlaceItemProps) => {
+const PlaceItem = ({ place, isDetailPage }: PlaceItemProps) => {
   const activePlace = useStore((state) => state.place);
   const setPlace = useStore((state) => state.setPlace);
   const moveToLocation = useStore((state) => state.moveTo);
@@ -16,22 +17,33 @@ const PlaceItem = ({ place }: PlaceItemProps) => {
     moveToLocation(location.lat, location.lng);
   };
 
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      onPlaceClick();
+    }
+  };
+
   return (
-    <div
+    <article
+      role="button"
+      tabIndex={0}
       onClick={onPlaceClick}
-      className={`flex items-center rounded-md border-[1px] ${place.id === activePlace.id ? 'border-1 border-c_bg_blue' : 'border-c_textarea_gray'} p-4`}
+      onKeyDown={onKeyDown}
+      className={`flex items-center rounded-md border-[1px] ${place.id === activePlace.id && !isDetailPage ? 'border-1 border-c_bg_blue' : 'border-c_border_gray'} p-4 ${isDetailPage ? 'cursor-default' : ''}`}
     >
       <img
         src={place.thumbnail_url}
         alt={place.name}
         className="h-16 w-16 rounded-md"
       />
-      <div className="ml-4">
+      <div className="ml-4" aria-label={`${place.name} 정보`}>
         <h4 className="text-lg font-semibold">{place.name}</h4>
         <p className="text-gray-500">{place.formed_address}</p>
-        <div className="text-yellow-500">{place.rating} ⭐️</div>
+        <div className="text-yellow-500" aria-label={`평점 ${place.rating}점`}>
+          {place.rating} ⭐️
+        </div>
       </div>
-    </div>
+    </article>
   );
 };
 

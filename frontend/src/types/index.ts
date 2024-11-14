@@ -25,7 +25,7 @@ export type Map = {
 };
 
 export type MapList = {
-  maps: MapItem[];
+  maps: MapItemType[];
   totalPages: number;
   currentPage: number;
 };
@@ -40,11 +40,15 @@ export type BaseMap = {
   mode: CreateMapType;
 };
 
-export type MapItem = {
+export type MapItemType = {
   id: number;
+  user: User;
   title: string;
+  isPublic: boolean;
+  thumbnailUrl: string;
   description: string;
-  pin_count: number;
+  pinCount: number;
+  createdAt: string;
 };
 
 export type User = {
@@ -53,10 +57,13 @@ export type User = {
   profile_url: string;
 };
 
+export type MarkerColor = 'red' | 'blue' | 'green' | string;
+export type MarkerCategory = 'restaurant' | 'cafe' | 'attraction' | string;
+
 export type PlaceMarker = {
   placeId: number;
-  color: string;
-  category: string;
+  color: MarkerColor;
+  category: MarkerCategory;
 };
 
 export type PreSignedURLResponse = {

@@ -3,6 +3,7 @@ import ImageUploader from './ImageUploader';
 import TextInputArea from '../common/TextInputArea';
 import VisibilitySelector from './VisibilitySelector';
 import Box from '../common/Box';
+import DashBoardHeader from '../common/DashBoardHeader';
 
 type FormWrapperProps = {
   header: string;
@@ -23,7 +24,7 @@ const FormWrapper = ({
 
   return (
     <div className="h-full">
-      <h2 className="p-4 text-xl font-semibold">{header}</h2>
+      <DashBoardHeader title={header} />
       <div className="flex h-[200px] gap-4 p-4">
         <ImageUploader />
         <select
@@ -45,7 +46,7 @@ const FormWrapper = ({
         <Box>
           <TextInputArea
             value={title}
-            onChange={(prev) => updateMapInfo('title', prev)}
+            onChange={(value) => updateMapInfo('title', value)}
             placeholder={'새 지도명을 입력해주세요.'}
             maxLength={20}
             height={28}
@@ -54,7 +55,7 @@ const FormWrapper = ({
           <p>지도 소개</p>
           <TextInputArea
             value={description}
-            onChange={(prev) => updateMapInfo('description', prev)}
+            onChange={(value) => updateMapInfo('description', value)}
             placeholder={'지도 소개를 입력해주세요.'}
             maxLength={150}
             height={160}

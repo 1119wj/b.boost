@@ -1,9 +1,17 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { throttle } from 'lodash';
+
+/**
+ * todo:
+ * 에러 발생 시 재시도 설정
+ * 데이터 캐싱 전략 검토
+ * 스크롤 위치 복원 로직 추가
+ */
 
 type InfiniteScrollOptions<TQueryFnData> = {
-  queryKey: string;
+  queryKey: string[];
   query?: string;
   queryFn: ({ pageParam }: { pageParam: number }) => Promise<TQueryFnData>;
   getNextPageParam: (
@@ -11,6 +19,7 @@ type InfiniteScrollOptions<TQueryFnData> = {
     allPages: TQueryFnData[],
   ) => number | undefined;
   threshold?: number;
+  defaultFetch?: boolean;
 };
 
 export const useInfiniteScroll = <TQueryFnData>({
@@ -18,25 +27,32 @@ export const useInfiniteScroll = <TQueryFnData>({
   query,
   queryFn,
   getNextPageParam,
-  threshold = 1.0,
+  threshold = 0.5,
+  defaultFetch = false,
 }: InfiniteScrollOptions<TQueryFnData>) => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery<TQueryFnData>({
-      queryKey: [queryKey, query],
+      queryKey: [...queryKey, query] as const,
       queryFn: ({ pageParam = 1 }) =>
         queryFn({ pageParam: pageParam as number }),
       initialPageParam: 1,
       getNextPageParam,
-      enabled: !!query,
+      enabled: !!query || defaultFetch,
     });
 
   const { ref, inView } = useInView({ threshold });
 
+  const throttledFetchNextPage = useRef(
+    throttle(() => {
+      fetchNextPage();
+    }, 500),
+  ).current;
+
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+      throttledFetchNextPage();
     }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [inView, throttledFetchNextPage]);
 
   return { ref, data, isFetchingNextPage, hasNextPage };
 };

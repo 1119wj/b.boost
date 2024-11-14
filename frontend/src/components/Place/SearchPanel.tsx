@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import BaseWrapper from '../common/BaseWrapper';
+
+import BaseWrapper from '@/components/common/BaseWrapper';
+import Box from '@/components/common/Box';
+import DashBoardHeader from '../common/DashBoardHeader';
+
 import SearchBar from './SearchBar';
 import SearchResults from './SearchResults';
-import Box from '../common/Box';
 import AddPlaceButton from './AddPlaceButton';
 
 const SearchPanel = () => {
@@ -11,7 +14,7 @@ const SearchPanel = () => {
   return (
     <BaseWrapper>
       <Box>
-        <h2 className="p-4 text-xl font-semibold">장소 검색</h2>
+        <DashBoardHeader title="장소 검색" />
         <SearchBar onSearch={(newQuery) => setQuery(newQuery)} />
       </Box>
       <Box>
