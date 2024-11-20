@@ -1,5 +1,7 @@
 import { GoogleMapState } from '@/store/googleMapSlice';
 import { PlaceState } from '@/store/placeSlice';
+import { ToastState } from '@/store/toastSlice';
+import { AuthState } from '@/store/userSlice';
 
 export type Place = {
   id: number;
@@ -16,6 +18,10 @@ export type Place = {
   category?: string;
 };
 
+export type CourseOrder = {
+  order: number;
+};
+
 export type Map = {
   id: number;
   user: User;
@@ -25,6 +31,17 @@ export type Map = {
   description: string;
   pinCount: number;
   places: (Place & CustomPlace)[];
+};
+
+export type Course = {
+  id: number;
+  user: User;
+  title: string;
+  isPublic: boolean;
+  thumbnailUrl: string;
+  description: string;
+  pinCount: number;
+  places: (Place & CustomPlace & CourseOrder)[];
 };
 
 export type MapList = {
@@ -57,7 +74,7 @@ export type MapItemType = {
 export type User = {
   id: number;
   nickname: string;
-  profile_url: string;
+  profileImageUrl: string;
 };
 
 export type MarkerColor =
@@ -102,4 +119,4 @@ export type PreSignedURLResponse = {
   url: string;
 };
 
-export type StoreState = GoogleMapState & PlaceState;
+export type StoreState = GoogleMapState & PlaceState & ToastState & AuthState;
