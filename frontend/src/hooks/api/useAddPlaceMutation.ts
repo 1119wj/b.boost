@@ -1,17 +1,15 @@
-import { addPlaceToCourse, addPlaceToMap } from '@/api/place';
-import { CreateMapType } from '@/types';
+import { addPlaceToMap } from '@/api/place';
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-export const useAddPlaceMutation = (mode: CreateMapType) => {
+export const useAddPlaceMutation = () => {
   const queryClient = useQueryClient();
-  const mutationFn = mode === 'MAP' ? addPlaceToMap : addPlaceToCourse;
 
   const addPlaceMutation = useMutation({
-    mutationFn: mutationFn,
+    mutationFn: addPlaceToMap,
     onSuccess: (data) => {
-      const placeId = data?.placeId;
       const id = data?.id;
-      queryClient.invalidateQueries({ queryKey: ['places', id, placeId] });
+      queryClient.invalidateQueries({ queryKey: ['map', id] });
     },
   });
 

@@ -1,14 +1,18 @@
-import { Loader } from '@googlemaps/js-api-loader';
 import { INITIAL_MAP_CONFIG } from '@/constants/map';
 import { StateCreator } from 'zustand';
 import { StoreState } from '@/types';
+import {
+  getGoogleMapClass,
+  getPlaceClass,
+  loadGoogleMapsApi,
+} from '@/lib/googleMapsAPI-loader';
 
 export type GoogleMapState = {
   googleMap: google.maps.Map | null;
-  markerLibrary: google.maps.MarkerLibrary | null;
   setGoogleMap: (map: google.maps.Map) => void;
   initializeMap: (container: HTMLElement) => void;
   moveTo: (lat: number, lng: number) => void;
+  findPlaces: (query: string) => void;
 };
 
 export const createGoogleMapSlice: StateCreator<
@@ -19,36 +23,15 @@ export const createGoogleMapSlice: StateCreator<
 > = (set, get) => ({
   googleMap: null,
   markerLibrary: null,
+  googleMapLibary: null,
 
   setGoogleMap: (map: google.maps.Map) => set({ googleMap: map }),
 
   initializeMap: async (container: HTMLElement) => {
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) {
-      throw new Error('Google Maps API 키가 설정되지 않았습니다.');
-    }
-    const loader = new Loader({
-      apiKey: apiKey,
-      version: '3.58',
-    });
-
-    try {
-      await loader.load();
-
-      const { Map: GoogleMap } = (await google.maps.importLibrary(
-        'maps',
-      )) as google.maps.MapsLibrary;
-
-      const markerLibrary = (await google.maps.importLibrary(
-        'marker',
-      )) as google.maps.MarkerLibrary;
-
-      const map = new GoogleMap(container, INITIAL_MAP_CONFIG);
-      set({ googleMap: map, markerLibrary });
-    } catch (error) {
-      console.error(error);
-      throw new Error('Failed to load Google Maps API');
-    }
+    await loadGoogleMapsApi();
+    const GoogleMap = getGoogleMapClass();
+    const map = new GoogleMap(container, INITIAL_MAP_CONFIG);
+    set({ googleMap: map });
   },
 
   moveTo: (lat: number, lng: number) => {
@@ -57,5 +40,21 @@ export const createGoogleMapSlice: StateCreator<
       map.panTo({ lat, lng });
       map.setZoom(14);
     }
+  },
+
+  findPlaces: async (query: string) => {
+    if (!query) {
+      return;
+    }
+    const Place = getPlaceClass();
+    const request: google.maps.places.SearchByTextRequest = {
+      textQuery: query,
+      language: 'ko',
+      region: 'KR',
+      fields: ['location', 'displayName'],
+      maxResultCount: 7,
+    };
+    const { places } = await Place.searchByText(request);
+    return places;
   },
 });

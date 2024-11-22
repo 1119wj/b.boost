@@ -16,7 +16,9 @@ type EditVisResponse = {
 };
 
 export const getMap = async (mapId: number) => {
-  const { data } = await axiosInstance.get<Map>(END_POINTS.MAP(mapId));
+  const { data } = await axiosInstance.get<Map>(END_POINTS.MAP(mapId), {
+    useAuth: false,
+  });
   return data;
 };
 
@@ -32,6 +34,7 @@ export const getMapList = async (pageParam: number) => {
   const { data } = await axiosInstance.get<MapList>(END_POINTS.MAPS, {
     params: {
       page: pageParam,
+      useAuth: false,
     },
   });
   return data;
@@ -43,7 +46,9 @@ export const getMyMapList = async () => {
 };
 
 export const getCourseList = async () => {
-  const { data } = await axiosInstance.get<MapList>(END_POINTS.COURSES);
+  const { data } = await axiosInstance.get<MapList>(END_POINTS.COURSES, {
+    useAuth: false,
+  });
   return data;
 };
 

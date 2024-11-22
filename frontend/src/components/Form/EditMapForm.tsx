@@ -5,8 +5,8 @@ import { BaseMap, Map } from '@/types';
 import { useEditMapMutation } from '@/hooks/api/useEditMapMutation';
 import { useMapForm } from '@/hooks/useMapForm';
 
-import PlaceListPanel from '../Place/PlaceListPanel';
 import { useNavigate } from 'react-router-dom';
+import { useStore } from '@/store/useStore';
 
 type EditMapFormProps = {
   mapData: Map;
@@ -15,6 +15,8 @@ type EditMapFormProps = {
 const EditMapForm = ({ mapData }: EditMapFormProps) => {
   const editMapMutation = useEditMapMutation();
   const navigate = useNavigate();
+  const addToast = useStore((state) => state.addToast);
+
   const initialMapData: BaseMap = {
     title: mapData.title,
     description: mapData.description,
@@ -27,10 +29,17 @@ const EditMapForm = ({ mapData }: EditMapFormProps) => {
 
   const onSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    editMapMutation.mutate({ mapId: mapData.id, ...mapInfo });
-    navigate(`/map/${mapData.id}`);
+    editMapMutation.mutate(
+      { mapId: mapData.id, ...mapInfo },
+      {
+        onSuccess: () => {
+          addToast('지도가 수정되었습니다.', '', 'success');
+          navigate(`/map/${mapData.id}`);
+        },
+      },
+    );
   };
-  console.log(mapData);
+
   return (
     <>
       <BaseWrapper position="" top="" left="" className="w-1/2">
@@ -43,7 +52,6 @@ const EditMapForm = ({ mapData }: EditMapFormProps) => {
           isEditMode={true}
         />
       </BaseWrapper>
-      <PlaceListPanel places={mapData.places} />
     </>
   );
 };

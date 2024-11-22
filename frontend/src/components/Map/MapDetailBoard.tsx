@@ -22,7 +22,7 @@ const MapDetailBoard = ({ mapData }: MapDetailBoardProps) => {
   const activePlace = useStore((state) => state.place);
   const customPlace = useMemo(
     () => places.find((place) => place.id === activePlace.id),
-    [places, activePlace],
+    [places, activePlace.id],
   );
 
   return (
@@ -30,19 +30,25 @@ const MapDetailBoard = ({ mapData }: MapDetailBoardProps) => {
       <BaseWrapper position="" top="" left="" className="w-1/2">
         <Box>
           <div className="flex justify-between">
-            <DashBoardHeader title="나의 지도" />
-            <div className="flex gap-1 text-center">
-              <EditMapButton mapId={mapData.id} text="수정" />
-              <p>|</p>
+            <DashBoardHeader title={title} />
+            <div className="flex items-center gap-1 text-center">
+              <EditMapButton text="수정" to={`/edit/map/${mapData.id}`} />
+              <p className="text-xs text-c_placeholder_gray">|</p>
               <DeleteMapButton mapId={mapData.id} text="삭제" />
             </div>
           </div>
           <img src="/src/assets/Map.jpg" alt="map" className="h-40 w-full" />
-          <h2>{title}</h2>
-          <p>지도 소개</p>
-          <p>{description}</p>
+          <p className="text-lg font-semibold">지도 소개</p>
+          <div className="rounded-md border-[1px] border-gray-100 p-1">
+            {description}
+          </div>
         </Box>
-        <Box>
+        <Box className="scrollbar-thumb-rounded-lg overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-400 hover:scrollbar-track-gray-200 hover:scrollbar-thumb-gray-500">
+          <EditMapButton
+            text="수정"
+            to={`/create/map/${mapData.id}`}
+            className="flex justify-end px-2"
+          />
           {places.map((place) => (
             <div key={place.id} onClick={() => setIsSidePanelOpen(true)}>
               <PlaceItem key={place.id} place={place} isDetailPage={true} />

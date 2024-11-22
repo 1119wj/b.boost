@@ -4,6 +4,7 @@ import App from './App';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { StrictMode } from 'react';
+import { loadGoogleMapsApi } from './lib/googleMapsAPI-loader';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -22,9 +23,7 @@ const queryClient = new QueryClient({
 
 root.render(
   <QueryClientProvider client={queryClient}>
-    <StrictMode>
-      <App />
-      {isDevelopment && <ReactQueryDevtools initialIsOpen={false} />}
-    </StrictMode>
+    <App />
+    {isDevelopment && <ReactQueryDevtools initialIsOpen={false} />}
   </QueryClientProvider>,
 );
