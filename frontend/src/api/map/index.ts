@@ -34,21 +34,14 @@ export const getMapList = async (pageParam: number) => {
   const { data } = await axiosInstance.get<MapList>(END_POINTS.MAPS, {
     params: {
       page: pageParam,
-      useAuth: false,
     },
+    useAuth: false,
   });
   return data;
 };
 
 export const getMyMapList = async () => {
   const { data } = await axiosInstance.get<MapList>(END_POINTS.MY_MAP);
-  return data;
-};
-
-export const getCourseList = async () => {
-  const { data } = await axiosInstance.get<MapList>(END_POINTS.COURSES, {
-    useAuth: false,
-  });
   return data;
 };
 

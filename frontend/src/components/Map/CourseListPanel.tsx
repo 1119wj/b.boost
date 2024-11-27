@@ -1,16 +1,17 @@
 import React from 'react';
 
-import { getMapList } from '@/api/map';
+import { getCourseList } from '@/api/course';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
-import { MapItemType, MapList } from '@/types';
+import { CourseList, MapItemType } from '@/types';
 
 import MapItem from '@/components/Map/MapItem';
+import CourseItem from './CourseItem';
 
-const MapListPanel = () => {
+const CourseListPanel = () => {
   const { data, isFetchingNextPage, hasNextPage, ref } =
-    useInfiniteScroll<MapList>({
-      queryKey: ['mapList'],
-      queryFn: ({ pageParam }) => getMapList(pageParam),
+    useInfiniteScroll<CourseList>({
+      queryKey: ['courseList'],
+      queryFn: ({ pageParam }) => getCourseList(pageParam),
       getNextPageParam: (lastPage) => {
         return lastPage.currentPage < lastPage.totalPages
           ? lastPage.currentPage + 1
@@ -24,8 +25,8 @@ const MapListPanel = () => {
       <div className="scrollbar-thumb-rounded-lg grid h-full grid-cols-5 gap-8 overflow-y-auto p-20 px-40 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-400 hover:scrollbar-track-gray-200 hover:scrollbar-thumb-gray-500">
         {data?.pages.map((page, index) => (
           <React.Fragment key={index}>
-            {page.maps.map((map: MapItemType) => (
-              <MapItem key={map.id} mapItem={map} />
+            {page.courses.map((map: MapItemType) => (
+              <CourseItem key={map.id} courseItem={map} />
             ))}
           </React.Fragment>
         ))}
@@ -35,4 +36,4 @@ const MapListPanel = () => {
   );
 };
 
-export default MapListPanel;
+export default CourseListPanel;

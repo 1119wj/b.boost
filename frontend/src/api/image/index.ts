@@ -9,14 +9,13 @@ const generatePreSignedPost = async (dirName: string, extension: string) => {
     {
       dirName: dirName,
       extension: extension,
+      params: {
+        blocking: true,
+        result: true,
+      },
     },
   );
   return data;
-};
-
-const getExtensionByFile = (file: File) => {
-  const extension = file.name.split('.').pop();
-  return extension ? extension.toLowerCase() : null;
 };
 
 const validateFile = (file: File, extension: string | null) => {
@@ -54,16 +53,17 @@ const resizeImage = async (
       canvas.toBlob(
         (blob) => {
           if (blob) {
-            const resizedFile = new File([blob], file.name, {
-              type: file.type,
+            const webpFileName = file.name.replace(/\.[^/.]+$/, '.webp');
+            const webpFile = new File([blob], webpFileName, {
+              type: 'image/webp',
             });
-            resolve(resizedFile);
+            resolve(webpFile);
           } else {
             reject(new Error('Blob Conversion Error'));
           }
         },
-        file.type,
-        0.9,
+        'image/webp',
+        0.8,
       );
     };
     img.onerror = (error) => reject(error);
@@ -73,7 +73,7 @@ const resizeImage = async (
 };
 
 export const uploadImage = async (file: File, dirName: string) => {
-  const extension = getExtensionByFile(file);
+  const extension = 'webp';
   if (!validateFile(file, extension)) {
     throw new Error(
       '지원되지 않는 파일 형식이거나 파일 크기가 3MB를 초과합니다.',
